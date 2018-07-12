@@ -77,7 +77,7 @@ public:
 
 class ShoppingCart
 {
-	Items items[30];
+	Items *items[20];
 	int count;
 
 public:
@@ -85,9 +85,13 @@ public:
 	ShoppingCart()
 	{
 		count=0;
+		for(int i=0;i<20;i++)
+		{
+			items[i]=NULL;
+		}
 	}
 
-	void addItems(Items item)
+	void addItems(Items* item)
 	{
 		if (count<30)
 		{
@@ -100,20 +104,21 @@ public:
 		}
 	}
 
-	void removeItem(Items item)
+	void removeItem(Items& item)
 	{
 		if(count>0)
 		{
 			for (int i=0;i<count;i++)
 			{
-				if(items[i]==item)
+				if(items[i]->getItemId()==item.getItemId())
 				{
-					items[i]=items[count];
-					count--;
+					
+					items[i]=items[--count];
+					break;
 				}
 				else
 				{
-					throw 1;
+				
 				}
 			}
 		}
@@ -128,7 +133,7 @@ public:
 	{
 		//if(index<count&&index>0)
 		//{
-			return items[index];
+			return *items[index];
 		//}
 		//else
 		//{
@@ -183,7 +188,7 @@ public:
 		else
 			throw 1;
 	}
-	ShoppingCart getshoppingcart()
+	ShoppingCart& getshoppingcart()
 	{
 		return shoppingcart;
 	}
@@ -262,58 +267,101 @@ public:
 	{
 		stock[0].setitem("se",1,1,200);
 		stock[1].setitem("dsa",1,2,300);
-		stockCount=2;
+		stock[2].setitem("os",1,3,300);
+		stock[3].setitem("db",1,4,300);
+		stockCount=4;
 	}
 
 	void enterInStore(Customer& c)
 	{
-
+		
 		cout<<endl<<endl<<endl<<endl<<"                       WELCOME TO BOOK STORE "<<endl;
 		cout<<"                      ______________________"<<endl;
 		entertainCustomer(c);
 
 	}
 
+	void storecheckout(ShoppingCart& sc)
+	{
+		system("cls");
+		if(sc.getItemCount()>0)
+		{
+		int total=0;
+		cout<<setw(15)<<"NAME"<<setw(10)<<"price"<<setw(10)<<"item id"<<endl;
+		for(int i=0;i<sc.getItemCount();i++)
+		{
+			if(sc.getitem(i).getItemStoreId()==1)
+			{
+				cout<<setw(10)<<i+1<<"-"<<sc.getitem(i).getItemName()<<setw(10)<<sc.getitem(i).getItemPrice()<<setw(10)<<sc.getitem(i).getItemId()<<endl;
+				total+=sc.getitem(i).getItemPrice();
+			}
+		}
+		cout<<setw(20)<<"total  : "<<total<<endl;
+		}
+		else
+		{
+			cout<<"YOU DIDN'T BUY ANYTHING from this store "<<endl;
+		}
+	}
 
 	void entertainCustomer(Customer& c)
-	{
-		customers=c;
+	{	customers=c;
 		customersCount++;
-		Sleep(1000);
 		system("cls");
-		showBooks(c);
-		Sleep(1000);		
-		cout<<"1- BUY"<<endl;
-		cout<<"2- exit "<<endl;
 		string selection;
+while(selection!="3")
+{
+		system("cls");
+		
+		cout<<"            "<<storeName<<endl;
+		cout<<"----------------------------------------"<<endl;
+		cout<<"         0-show shoes"<<endl;
+		cout<<"         1- BUY"<<endl;
+		cout<<"         2-checkout"<<endl;
+		cout<<"         3- exit "<<endl;
+
 		cin>>selection;
 		if(selection=="1")
 		{
+			
 			sellBooks(c);
-			while(1)
-			{
-				cout<<" do you want to buy more books "<<endl;
-					cout<<"y- yes            any key to exit"<<endl;
-					string sel;
-					cin>>sel;
-					if(sel=="y")
-					{
-						showBooks(c);
-						sellBooks(c);
-					}
-					else
-					{
-						break;
-					}
-			}
+			continue;
 			
 		}
-		exitStore(c);
+		else if(selection=="0")
+		{
+			showBooks(c);
+			system("pause");
+		}
+		else if(selection=="2")
+		{
+			storecheckout(c.getshoppingcart());
+			int index;
+			cout<<"Enter id of the item you want to remove or any key to exit : ";
+			cin>>index;
+			cin.clear();
+			int i=0;
+			while(index!=stock[i].getItemId()&&i<stockCount)
+			{
+				i++;
+			}
+			if(index==stock[i].getItemId())
+			{
+				removeFromCart(c.getshoppingcart(),stock[i]);
+			}
+			else
+			{
+
+			}
+		}
+		else
+			exitStore(c);
+	}
 	}
 
 	void addToCart(ShoppingCart& scart,Items& item)
 	{
-		scart.addItems(item);
+		scart.addItems(&item);
 
 		
 	}
@@ -325,6 +373,10 @@ public:
 
 	void sellBooks(Customer& c)
 	{
+		system("cls");
+		while(1)
+		{
+		showBooks(c);
 		cout<<"ENTER THE ID oF THE BOOK YOU WANT TO Buy : " ;
 		int id;
 		cin>>id;
@@ -347,10 +399,12 @@ public:
 			else
 			{
 				cout<<"Sorry book not found "<<endl;
+				break;
 				Sleep(1000);
 				system("cls");
 			
 			}
+		}
 
 	}
 
@@ -414,10 +468,37 @@ class GameStore:public Store
 public:
 	GameStore():Store(2,"game Store",2)
 	{
-		stock[0].setitem("cod 4",1,1,200);
-		stock[1].setitem("gta",1,2,300);
-		stockCount=2;
+		stock[0].setitem("cod 4",2,201,200);
+		stock[1].setitem("gta",2,202,300);
+		stock[2].setitem("fifa 16",2,203,300);
+		stock[3].setitem("cs",2,204,300);
+		stockCount=4;
 	}
+
+
+	void storecheckout(ShoppingCart& sc)
+	{
+		system("cls");
+		if(sc.getItemCount()>0)
+		{
+		int total=0;
+		cout<<setw(15)<<"NAME"<<setw(10)<<"price"<<setw(10)<<"item id"<<endl;
+		for(int i=0;i<sc.getItemCount();i++)
+		{
+			if(sc.getitem(i).getItemStoreId()==2)
+			{
+				cout<<setw(10)<<i+1<<"-"<<sc.getitem(i).getItemName()<<setw(10)<<sc.getitem(i).getItemPrice()<<setw(10)<<sc.getitem(i).getItemId()<<endl;
+				total+=sc.getitem(i).getItemPrice();
+			}
+		}
+		cout<<setw(20)<<"total  : "<<total<<endl;
+		}
+		else
+		{
+			cout<<"YOU DIDN'T BUY ANYTHING from this store "<<endl;
+		}
+	}
+
 
 	void enterInStore(Customer& c)
 	{
@@ -430,44 +511,63 @@ public:
 
 
 	void entertainCustomer(Customer& c)
-	{
-		customers=c;
+	{	customers=c;
 		customersCount++;
-		Sleep(1000);
 		system("cls");
-		showgames(c);
-		Sleep(1000);		
-		cout<<"1- BUY"<<endl;
-		cout<<"2- exit "<<endl;
 		string selection;
+while(selection!="3")
+{
+		system("cls");
+		
+		cout<<"            "<<storeName<<endl;
+		cout<<"----------------------------------------"<<endl;
+		cout<<"         0-show shoes"<<endl;
+		cout<<"         1- BUY"<<endl;
+		cout<<"         2-checkout"<<endl;
+		cout<<"         3- exit "<<endl;
+
 		cin>>selection;
 		if(selection=="1")
 		{
 			sellgames(c);
-			while(1)
-			{
-				cout<<" do you want to buy more games "<<endl;
-					cout<<"y- yes            any key to exit"<<endl;
-					string sel;
-					cin>>sel;
-					if(sel=="y")
-					{
-						showgames(c);
-						sellgames(c);
-					}
-					else
-					{
-						break;
-					}
-			}
+			continue;
 			
 		}
-		exitStore(c);
+		else if(selection=="0")
+		{
+			showgames(c);
+			system("pause");
+		}
+		else if(selection=="2")
+		{
+			storecheckout(c.getshoppingcart());
+			int index;
+			cout<<"Enter id of the item you want to remove or any key to exit : ";
+			cin>>index;
+			cin.clear();
+			int i=0;
+			while(index!=stock[i].getItemId()&&i<stockCount)
+			{
+				i++;
+			}
+			if(index==stock[i].getItemId())
+			{
+				removeFromCart(c.getshoppingcart(),stock[i]);
+			}
+			else
+			{
+
+			}
+			system("pause");
+		}
+		else
+			exitStore(c);
+	}
 	}
 
 	void addToCart(ShoppingCart& scart,Items& item)
 	{
-		scart.addItems(item);
+		scart.addItems(&item);
 
 		
 	}
@@ -479,7 +579,11 @@ public:
 
 	void sellgames(Customer& c)
 	{
-		cout<<"ENTER THE ID oF THE game YOU WANT TO Buy : " ;
+		system("cls");
+		while(1)
+		{
+		showgames(c);
+		cout<<"ENTER THE ID oF THE game YOU WANT TO Buy or any other key to exit : " ;
 		int id;
 		cin>>id;
 		cin.clear();
@@ -501,11 +605,12 @@ public:
 			else
 			{
 				cout<<"Sorry game not found "<<endl;
+				break;
 				Sleep(1000);
 				system("cls");
 			
 			}
-
+		}
 	}
 
 	void showgames(Customer& c)const
@@ -563,11 +668,36 @@ class ShoesStore:public Store
 {
 
 public:
-	ShoesStore():Store(2,"SHOES Store",2)
+	ShoesStore():Store(2,"SHOES Store",3)
 	{
-		stock[0].setitem("cod 4",1,1,200);
-		stock[1].setitem("gta",1,2,300);
-		stockCount=2;
+		stock[0].setitem("casuals 4",3,301,200);
+		stock[1].setitem("school shoes",3,302,300);
+		stock[2].setitem("loafers",3,303,300);
+		stock[3].setitem("formals",3,304,300);
+		stockCount=4;
+	}
+
+	void storecheckout(ShoppingCart& sc)
+	{
+		system("cls");
+		if(sc.getItemCount()>0)
+		{
+		int total=0;
+		cout<<setw(15)<<"NAME"<<setw(10)<<"price"<<setw(10)<<"item id"<<endl;
+		for(int i=0;i<sc.getItemCount();i++)
+		{
+			if(sc.getitem(i).getItemStoreId()==3)
+			{
+				cout<<setw(10)<<i+1<<"-"<<sc.getitem(i).getItemName()<<setw(10)<<sc.getitem(i).getItemPrice()<<setw(10)<<sc.getitem(i).getItemId()<<endl;
+				total+=sc.getitem(i).getItemPrice();
+			}
+		}
+		cout<<"total  : "<<total<<endl;
+		}
+		else
+		{
+			cout<<"YOU DIDN'T BUY ANYTHING from this store "<<endl;
+		}
 	}
 
 	void enterInStore(Customer& c)
@@ -584,41 +714,59 @@ public:
 	{
 		customers=c;
 		customersCount++;
-		Sleep(1000);
 		system("cls");
-		showshoes(c);
-		Sleep(1000);		
-		cout<<"1- BUY"<<endl;
-		cout<<"2- exit "<<endl;
 		string selection;
+while(selection!="3")
+{
+		system("cls");
+		
+		cout<<"            "<<storeName<<endl;
+		cout<<"----------------------------------------"<<endl;
+		cout<<"         0-show shoes"<<endl;
+		cout<<"         1- BUY"<<endl;
+		cout<<"         2-checkout"<<endl;
+		cout<<"         3- exit "<<endl;
+
 		cin>>selection;
 		if(selection=="1")
 		{
 			sellshoes(c);
-			while(1)
-			{
-				cout<<" do you want to buy more shoes "<<endl;
-					cout<<"y- yes            any key to exit"<<endl;
-					string sel;
-					cin>>sel;
-					if(sel=="y")
-					{
-						showshoes(c);
-						sellshoes(c);
-					}
-					else
-					{
-						break;
-					}
-			}
+			continue;
 			
 		}
-		exitStore(c);
-	}
+		else if(selection=="0")
+		{
+			showshoes(c);
+			system("pause");
+		}
+		else if(selection=="2")
+		{
+			storecheckout(c.getshoppingcart());
+			int index;
+			cout<<"Enter id of the item you want to remove or any key to exit : ";
+			cin>>index;
+			cin.clear();
+			int i=0;
+			while(index!=stock[i].getItemId()&&i<stockCount)
+			{
+				i++;
+			}
+			if(index==stock[i].getItemId())
+			{
+				removeFromCart(c.getshoppingcart(),stock[i]);
+			}
+			else
+			{
 
+			}
+		}
+		else
+			exitStore(c);
+	}
+	}
 	void addToCart(ShoppingCart& scart,Items& item)
 	{
-		scart.addItems(item);
+		scart.addItems(&item);
 
 		
 	}
@@ -630,7 +778,11 @@ public:
 
 	void sellshoes(Customer& c)
 	{
-		cout<<"ENTER THE ID oF THE shoes YOU WANT TO Buy : " ;
+		system("cls");
+		while(1)
+		{
+		showshoes(c);
+		cout<<"ENTER THE ID oF THE shoes YOU WANT TO Buy or any other number to exit : " ;
 		int id;
 		cin>>id;
 		cin.clear();
@@ -652,11 +804,14 @@ public:
 			else
 			{
 				cout<<"Sorry shoes not found "<<endl;
+
 				Sleep(1000);
+				break;
 				system("cls");
 			
 			}
 
+		}
 	}
 
 	void showshoes(Customer& c)const
@@ -732,40 +887,64 @@ public:
 
 	void Enter(Customer& c)
 	{
+		string sel="";
 		welcome();
-		Sleep(3000);
+		//Sleep(3000);
 		system("cls");
-
-		cout<<"press 1 to get shopping cart          any key to extit "<<endl;
-		string sel;
-		cin>>sel;
-		cin.clear();
-
-		if(sel=="1")
+		while(sel!="4")
 		{
-			c.setShoppingCart(provideShoppingcart());
-			while(sel=="1")
+			system("cls");
+			cout<<endl<<endl<<mallName<<endl;
+			cout<<"----------------------------------------------------"<<endl;
+			cout<<""<<endl<<endl;
+			cout<<"          "<<"1-Enter in store"<<endl;
+			cout<<"          "<<"2-Get Shopping cart"<<endl;
+			cout<<"          "<<"3-Chekout "<<endl;
+			cout<<"          " <<"4-Exit"<<endl;
+
+		
+			cin>>sel;
+			cin.clear();
+
+			if(sel=="2")
 			{
-				
-				system("cls");
-				Store* tempst=ShownSelectStores(c);
-				c.changeStore(tempst -> getStoreid());
-				tempst->enterInStore(c);
-				cout<<"Do you want to enter another store ?"<<endl;
-				cout<<"press 1 if yes       else any key to exit";
-				cin>>sel;
+				c.setShoppingCart(provideShoppingcart());
+				cout<<"you have got your shopping cart "<<endl;
+				Sleep(1000);
 
 			}
-			checkout(c.getshoppingcart());
+			else if(sel=="1")
+			{
+				while(sel=="1")
+				{
+				
+					system("cls");
+					Store* tempst=ShownSelectStores(c);
+					c.changeStore(tempst -> getStoreid());
+					tempst->enterInStore(c);
+					sel="";
 
-		}
-		else
-		{
-			exit(c);
-		}
+				}
+			}
+			else if(sel=="3")
+			{
+				system("cls");
+				checkout(c.getshoppingcart());
+				system("pause");
+			}
+			else if(sel=="4")
+			{
+				continue;
+			}
+			else
+			{
+
+				continue;
+			}
 		
 
-
+		}
+		exit(c);
 	}
 
 	Store* ShownSelectStores(Customer& c)
@@ -815,6 +994,8 @@ public:
 	void checkout(ShoppingCart& sc)
 	{
 		system("cls");
+		if(sc.getItemCount()>0)
+		{
 		int total=0;
 		for(int i=0;i<sc.getItemCount();i++)
 		{
@@ -822,6 +1003,11 @@ public:
 			total+=sc.getitem(i).getItemPrice();
 		}
 		cout<<setw(20)<<"total  : "<<total<<endl;
+		}
+		else
+		{
+			cout<<"YOU DIDN'T BUY ANYTHING YET "<<endl;
+		}
 	}
 
 	void exit(Customer& c)
@@ -853,8 +1039,7 @@ void main()
 	Customer c;
 	
 	ShoppingCart s;
-	c.setCustomer("jawad",s,1);
-	Items i("abc",1,1,111);
+	
 	Mall m;
 	Store* st=&b;
 	m.setStores(st);
@@ -862,6 +1047,11 @@ void main()
 	m.setStores(st);
 	st=&str;
 	m.setStores(st);
+	cout<<"Enter your name : ";
+	string name;
+	cin>>name;
+	c.setCustomer(name,s,1);
+
 
 	m.Enter(c);
 	
